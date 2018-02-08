@@ -1,0 +1,32 @@
+See drawing in (html link: )
+
+Pin PB2 driver for the resistor (100K - callibrated measure was 99.35 kohm)
+Pin PB1 friver for quick charge and discharge of the capacitor - connected to
+  resistor 330-510 ohm (over 100 times quicker charge, discharge)
+Pin PA1 input connected to capacitor via current limiting resistor, in case of bug
+  and connection of the pin as output, and the inputs of the window comparator.
+Pin A6, A7 are output for debug purposes
+
+
+Operation
+ * PB2 driver High and Low at a rate slower than 99% charge of the capacitor
+    every time the charge on the capacitor discharged less than 90% (0.33V)
+    the rate of discharge is increased at least 100 fold by discharging via
+    pin PB1 and a resistor of 470-330 ohm.
+ * Pin PA1 connected as input of the two comparators in window configuration.
+    The comparators are set to generate events on change. These events are
+    routed to trigger input capture of timer IC4, and simultaneously interrupt
+    request to the EXTI block. The interrupt handling routines for the comparators
+    are to read the contents of the capture register
+
+
+
+
+
+Functional Blocks To Access
+
+ 1. COMP
+ 2. EXTI
+ 3. TIM
+ 4. GPIO
+ 5. 

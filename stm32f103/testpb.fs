@@ -1,0 +1,25 @@
+GPIOA_BASE GPIO_CRL + constant PA-CRL-R
+GPIOA_BASE GPIO_CRH + constant PA-CRH-R
+GPIOA_BASE GPIO_IDR + constant PA-IDR-R
+GPIOA_BASE GPIO_ODR + constant PA-ODR-R
+GPIOA_BASE GPIO_BSRR + constant PA-BSRR-R
+
+: SETUP-PA0-3
+	$5 RCC_APB2ENR_R HBIS!
+	AFIO_BASE AFIO_MAPR + DUP @ 
+	$7000000 BIC $4000000 OR SWAP ! 
+	$00001111 PA-CRL-R ! 
+	$000F0000 PA-BSRR-R !
+;
+
+SETUP-PA0-3
+
+: tpa-ms ( ms -- )
+	1024 0 DO 
+		I 8 MOD 
+		PA-ODR-R c! 
+		dup ms
+	LOOP 
+	drop
+; 
+

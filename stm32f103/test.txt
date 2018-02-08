@@ -1,0 +1,48 @@
+: initADCi ( n1 ... ni inChans adcI -- )
+  	\ enable clock to ADCi and reset it   
+  	case
+	  1 of 
+	      adc1_base 
+	      $0200 rcc_apb2enr_r bis!
+	      100 0 do loop \ delay for device enable to take effect (not sure needed)
+	      \ reset ADC 1 in RCC unit
+	      $0200 rcc_apb2rstr_r bis!
+	      100 0 do loop \ wait a while for reset to take effect
+	      $0200 rcc_apb2rstr_r bic!
+	    endof
+	  2 of 
+	      $0400 rcc_apb2enr_r bis!
+	      100 0 do loop \ delay for device enable to take effect (not sure needed)
+	      \ reset ADC 2 in RCC unit
+	      $0400 rcc_apb2rstr_r bis!
+	      100 0 do loop \ wait a while for reset to take effect
+	      $0400 rcc_apb2rstr_r bic!
+	      adc2_base
+	    endof
+	  3 of 
+	      $8000 rcc_apb2enr_r bis!
+	      100 0 do loop \ delay for device enable to take effect (not sure needed)
+	      \ reset ADC 3 in RCC unit
+	      $8000 rcc_apb2rstr_r bis!
+	      100 0 do loop \ wait a while for reset to take effect
+	      $8000 rcc_apb2rstr_r bic!
+	      adc3_base 
+	    endof
+	  dup 0 > if
+	    0 do
+	      drop
+	    loop
+	  then
+	  exit
+	endcase
+	\ init ADCi
+	\ calibrate ADC1
+	\ set to single conversion mode
+	\ set default conversion channels and sampling time per channel
+	\ set data alignment
+	
+	ADON adc1_base adc_cr2 + bis! \ turn ADC1 on from powerdown
+	
+; 
+
+
