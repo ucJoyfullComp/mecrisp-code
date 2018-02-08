@@ -1,0 +1,19 @@
+compiletoflash
+
+include utils.4th
+include regmap.4th
+include sysclock.4th
+include delay.4th
+
+: init
+    setsysclock
+    init-delay
+;
+
+compiletoram
+
+1s-Pulse
+
+init
+
+

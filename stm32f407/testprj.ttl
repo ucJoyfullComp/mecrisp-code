@@ -1,0 +1,45 @@
+; sample macro of Tera Term
+;
+; File: testprj.ttl
+; Description: send a list of file in *.prj file 
+;   the files of text line by line 
+;   get "ok" on each line before continue
+; Environment: generic
+; Update: 2014/8/1
+; Author: Uzi Cohen
+timeout = 2
+connect '/C=9'
+
+sendln
+filenamebox 'Project: file of Files to upload to STM32 Forth' 0
+if result<>0 then
+	fileopen prjhandle inputstr 0
+	filereadln prjhandle fname
+	while result==0
+		fileopen fhandle fname 0
+		filereadln fhandle line
+		while result==0
+			sendln line
+			recvln
+			if result==0 goto fclose
+			strmatch inputstr 'ok.$'
+			if result==0 then
+				goto fclose
+			endif
+			mpause 70
+			filereadln fhandle line
+		endwhile
+;		dispstr "file '" fname "' uploaded"#13
+		filereadln prjhandle fname
+		sendln
+		sendln
+		mpause 100
+	endwhile
+endif
+dispstr "#----- Macro Finish -----"#13
+exit
+
+:fclose
+	fileclose fhandle
+	dispstr "# Error exited prematurely"#13
+	dispstr inputstr #13
