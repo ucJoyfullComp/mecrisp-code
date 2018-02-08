@@ -1,0 +1,37 @@
+: tick  ( -- ) ." Tick" cr ;
+
+: clock ( -- ) 
+  ['] tick irq-systick !
+  systick-1Hz
+  eint
+;
+
+SPI_CR1 SPI1_BASE + constant SPI_CR1_R
+SPI_CR2 SPI1_BASE + constant SPI_CR2_R
+SPI_SR SPI1_BASE + constant SPI_SR_R
+SPI_DR SPI1_BASE + constant SPI_DR_R
+SPI_CRCPR SPI1_BASE + constant SPI_CRCPR_R
+SPI_RXCRCR SPI1_BASE + constant SPI_RXCRCR_R
+SPI_TXCRCR SPI1_BASE + constant SPI_TXCRCR_R
+SPI_I2SCFGR SPI1_BASE + constant SPI_I2SCFGR_R
+SPI_I2SPR SPI1_BASE + constant SPI_I2SPR_R
+
+RCC_CR RCC_BASE + constant RCC_CR_R
+RCC_CFGR RCC_BASE + constant RCC_CFGR_R
+RCC_CIR RCC_BASE + constant RCC_CIR_R
+RCC_APB2RSTR RCC_BASE + constant RCC_APB2RSTR_R
+RCC_APB1RSTR RCC_BASE + constant RCC_APB1RSTR_R
+RCC_AHBENR RCC_BASE + constant RCC_AHBENR_R
+RCC_APB2ENR RCC_BASE + constant RCC_APB2ENR_R
+RCC_APB1ENR RCC_BASE + constant RCC_APB1ENR_R
+RCC_BDCR RCC_BASE + constant RCC_BDCR_R
+RCC_CSR RCC_BASE + constant RCC_CSR_R
+RCC_AHBRSTR RCC_BASE + constant RCC_AHBRSTR_R
+RCC_CFGR2 RCC_BASE + constant RCC_CFGR2_R
+RCC_CFGR3 RCC_BASE + constant RCC_CFGR3_R
+RCC_CR2 RCC_BASE + constant RCC_CR2_R
+
+: init-spi1
+  RCC_APB2ENR_R dup @ $1004 bis swap ! 
+  GPIOA_BASE GPIO_CRL + dup @ $F0F00000 bic $B0B00000 or swap !
+  
