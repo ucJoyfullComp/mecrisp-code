@@ -47,30 +47,37 @@
     then
 ;
 
-: set-tim4-oc ( clocks oc# -- )
+: set-tim-oc ( clocks oc# n -- )
+    tim-base-addr-2to4
+    0= if drop 2drop exit then
+    swap
     case
 	1 of
-	    $60 tim4_base tim_ccmr1 + dup $ff swap hbic! hbis!
-	    $1 tim4_base tim_ccer + dup $3 swap hbic! hbis!
-	    tim4_base tim_ccr1 + h! 
+	    $60 over tim_ccmr1 + dup $ff swap hbic! hbis!
+	    $1 over tim_ccer + dup $3 swap hbic! hbis!
+	    tim_ccr1 + h! 
 	endof
 	2 of 
-	    $6000 tim4_base tim_ccmr1 + dup $ff00 swap hbic! hbis!
-	    $10 tim4_base tim_ccer + dup $30 swap hbic! hbis!
-	    tim4_base tim_ccr2 + h! 
+	    $6000 over tim_ccmr1 + dup $ff00 swap hbic! hbis!
+	    $10 over tim_ccer + dup $30 swap hbic! hbis!
+	    tim_ccr2 + h! 
 	endof
 	3 of 
-	    $60 tim4_base tim_ccmr2 + dup $ff swap hbic! hbis!
-	    $100 tim4_base tim_ccer + dup $300 swap hbic! hbis!
-	    tim4_base tim_ccr3 + h! 
+	    $60 over tim_ccmr2 + dup $ff swap hbic! hbis!
+	    $100 over tim_ccer + dup $300 swap hbic! hbis!
+	    tim_ccr3 + h! 
 	endof
 	4 of 
-	    $6000 tim4_base tim_ccmr2 + dup $ff00 swap hbic! hbis!
-	    $1000 tim4_base tim_ccer + dup $3000 swap hbic! hbis!
-	    tim4_base tim_ccr4 + h! 
+	    $6000 over tim_ccmr2 + dup $ff00 swap hbic! hbis!
+	    $1000 over tim_ccer + dup $3000 swap hbic! hbis!
+	    tim_ccr4 + h! 
 	endof
-	2drop exit
+	drop 2drop exit
     endcase 
+;
+
+: set-tim4-oc ( clocks oc# -- )
+    4 set-tim-oc
 ;
 
 : genFreqInPB6 ( freq -- )
