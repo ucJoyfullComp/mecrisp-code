@@ -1,3 +1,0 @@
-: enable-irq ( irq# -- )
-    
-;
