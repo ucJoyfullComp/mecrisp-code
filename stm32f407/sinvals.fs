@@ -42,6 +42,7 @@ TIM3_BASE TIM1_ARR + constant TIM3_ARR
 	10 0 do loop
 
 	ARPE TIM3_BASE TIM1_CR1 + bis! 			\ Auto-reload preload enable
+	0 TIM3_BASE TIM1_PSC + h!
 	GetApb1TimClock Fs @ / 1- TIM3_BASE TIM1_ARR + !	\ timebase - 100khz
 	UG TIM3_BASE TIM1_EGR + !				\ Update generation
 	$0060 TIM3_BASE TIM1_CCMR1 + h! \ CH1 PWM output
@@ -107,7 +108,7 @@ TIM3_BASE TIM1_ARR + constant TIM3_ARR
 	TIM3_CCR1 h!
 	arridx @ 1+ dup sintab_size >= if sintab_size - then
 	arridx !
-	\ $8000 GPIOE_BASE GPIO_ODR + xor!
+	$8000 GPIOE_BASE GPIO_ODR + xor!
 	UIF TIM3_SR bic! 			\ clear interrupt source
 ;
 
@@ -126,7 +127,7 @@ TIM3_BASE TIM1_ARR + constant TIM3_ARR
 	1 29 lshift NVIC_ISER0_R bis!
 	tim3-init
 	tim3-ccr1-init
-	\ tim3-dbg-init
+	tim3-dbg-init
 
 	TIM3_ARR h@ 9 - sintab do-sintab
 	sintab_size 0 do
@@ -141,5 +142,31 @@ TIM3_BASE TIM1_ARR + constant TIM3_ARR
 	1 29 lshift NVIC_ISER0_R bic!
 	['] serial-key? hook-key? !
 	0 TIM3_CCR1 h!
+;
+
+: freq-gen ( fmax fmin -- )
+	GetApb1TimClock >r
+	r>
+	drop 2drop
+;
+
+: test01
+	['] tim3-isr irq-tim3 !
+	1 29 lshift NVIC_ISER0_R bis!
+	tim3-init
+	tim3-ccr1-init
+	1 TIM3_CCR1 h!
+	UIF TIM3_DIER bis!
+
+	100 1- TIM3_BASE TIM1_PSC + h!
+	2 TIM3_CCR1 h!
+	50 0 do
+		i 1+ 130 + TIM3_ARR h!
+		100 ms
+		i 1+ 180 + TIM3_ARR h!
+		100 ms
+	loop
+	0 TIM3_DIER h!
+	1 29 lshift NVIC_ISER0_R bic!
 ;
 
