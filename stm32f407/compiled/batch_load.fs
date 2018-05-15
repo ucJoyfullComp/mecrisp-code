@@ -1,9 +1,11 @@
 compiletoflash
 
-include utils.fs
-include regmap.fs
-include sysclock.fs
-include delay.fs
+include 00_xtrafunc.fs
+include 01_sine.fs
+include 02_utils.fs
+include 03_regmap.fs
+include 04_sysclock.fs
+include 05_delay.fs
 
 : init
     setsysclock
