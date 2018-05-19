@@ -136,7 +136,7 @@
     then
 ;
 
-: GetPllClock
+: GetPllClock ( -- u )
     PllOn? if
 	    HseOn? if
 	      GetPllSrc 0= if
@@ -294,20 +294,126 @@
     begin $08000000 rcc_cr_r @ and 0= not until
 ;
 
-: SetSysClockToPll
-    \ HCLK = SYSCLK/1 PCLK2 = HCLK/2 PCLK1 = HCLK/4
-    $FCF0 not rcc_cfgr_r @ and $9400 or rcc_cfgr_r !
-    \ Select the main PLL as system clock source
-    $3 not rcc_cfgr_r @ and $2 or rcc_cfgr_r !
-    \ Wait till the main PLL is used as system clock source
-    \ if test fails after 500 tests exit.
-    0
-    begin
-    	1+ dup 500 >
-    	rcc_cfgr_r @ $0000000c and $8 =
-    	or
-    until
-    drop
+: GetMaxAHBClock ( -- u )
+	PWR_CR_R @ $4000 and 0= if
+		144000000
+	else
+		168000000
+	then
+;
+
+: MapRatio2AHBCfg ( u -- cfgr )
+  dup 1 <= not if
+  	dup 256 <= if
+  		dup 128 <= if
+	  		dup 64 <= if
+					dup 32 <= if
+						dup 16 <= if
+							dup 8 <= if
+								dup 4 <= if
+									2 <= if
+										$80
+									else
+										$90
+									then
+								else
+									drop $A0
+								then
+							else
+								drop $B0
+							then
+						else
+							drop $C0
+						then
+					else
+						drop $D0
+					then
+	  		else
+	  			drop $E0
+	  		then
+  		else
+  			drop $F0
+  		then
+  	else
+			drop $F0
+		then
+	else
+		drop 0
+  then
+;
+
+: MapRatio2APB2Cfg ( u -- cfgr )
+  dup 1 <= not if
+		dup 16 <= if
+			dup 8 <= if
+				dup 4 <= if
+					2 <= if
+						$8000
+					else
+						$A000
+					then
+				else
+					drop $C000
+				then
+			else
+				drop $E000
+			then
+		else
+			drop $E000
+		then
+  else
+  	drop 0
+  then
+;
+
+: MapRatio2APB1Cfg ( u -- cfgr )
+  dup 1 <= not if
+		dup 16 <= if
+			dup 8 <= if
+				dup 4 <= if
+					2 <= if
+						$1000
+					else
+						$1400
+					then
+				else
+					drop $1800
+				then
+			else
+				drop $1C00
+			then
+		else
+			drop $1C00
+		then
+  else
+  	drop 0
+  then
+;
+
+: SetSysClockToPll ( -- )
+  \ HCLK = SYSCLK/1 PCLK2 = HCLK/2 PCLK1 = HCLK/4
+  $FCF0 not rcc_cfgr_r @ and
+  GetPLLClock GetMaxAHBClock /
+  MapRatio2AHBCfg
+  or
+  GetPLLClock 84000000 /
+	MapRatio2APB2Cfg
+  or
+  GetPLLClock 42000000 /
+	MapRatio2APB1Cfg
+  or
+  rcc_cfgr_r !
+  \ Select the main PLL as system clock source
+  $3 not rcc_cfgr_r @ and $2 or rcc_cfgr_r !
+  \ Wait till the main PLL is used as system clock source
+  \ if test fails after 500 tests exit.
+  0
+  begin
+  	1+ dup 500 >
+  	rcc_cfgr_r @ $0000000c and $8 =
+  	or
+  until
+  drop
 ;
 
 : SetFlashWs ( nWs -- )
@@ -429,7 +535,7 @@
     then
     \ set the flash WS accordingly, set the bus clocks prescalers to 1
     \ update the USART2
-    SetFlashWs
+    0 SetFlashWs
     rcc_cfgr_r dup @ $FCF0 bic swap !
     UpdateUART2
     GetSysClock SysClockVar !
@@ -444,7 +550,7 @@
         leave
       then
     loop
-    $20000 rcc_cr_r bit@ 0= if
+    $20000 rcc_cr_r bit@ not if
       ." unable to turn HSE on. Staying in current clock."
       exit
     then
@@ -460,38 +566,10 @@
     then
     \ set the flash WS accordingly, set the bus clocks prescalers to 1
     \ update the USART2
-    SetFlashWs
+    0 SetFlashWs
     rcc_cfgr_r dup @ $FCF0 bic swap !
     UpdateUART2
     GetSysClock SysClockVar !
 ;
 
-compiletoram
-
-0 0 2variable test_store
-
-: test_freq ( -- )
-\ use port E11 to toggle as fast as possible to check cpu freq
-    %01 11 2* lshift $00C00000 gpioe_base gpio_moder +	@|+!
-    %0 11 lshift $0800 gpioe_base gpio_otyper + @|+!
-    %11 11 2* lshift $00C00000 gpioe_base gpio_ospeedr + @|+!
-    %00 11 2* lshift $00C00000 gpioe_base gpio_pupdr + @|+!
-    $0800 gpioe_base gpio_odr + test_store 2!
-    10000 0 do \ loop 10K times
-    	test_store 2@ hxor!
-    loop
-;
-
-: maketest ( -- )
-    ." Test default clock" cr
-    1000 0 do 85 emit loop
-    test_freq
-    SetSysClock
-    ." Test pll clock" cr
-    test_freq
-    cr
-    1000 0 do 85 emit loop
-;
-
-compiletoflash
 
