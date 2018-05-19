@@ -393,13 +393,16 @@
 : SetSysClockToPll ( -- )
   \ HCLK = SYSCLK/1 PCLK2 = HCLK/2 PCLK1 = HCLK/4
   $FCF0 not rcc_cfgr_r @ and
-  GetPLLClock GetMaxAHBClock /
+  GetPLLClock GetMaxAHBClock /mod swap
+  0= not if 1+ then
   MapRatio2AHBCfg
   or
-  GetPLLClock 84000000 /
+  GetPLLClock 84000000 /mod swap
+  0= not if 1+ then
 	MapRatio2APB2Cfg
   or
-  GetPLLClock 42000000 /
+  GetPLLClock 42000000 /mod swap
+  0= not if 1+ then
 	MapRatio2APB1Cfg
   or
   rcc_cfgr_r !
