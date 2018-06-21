@@ -37,7 +37,7 @@ adcdbuf maxadcchs hcells + variable adchbuf
 
 : dmaadc-init
     \ update Interrupt vector
-    ['] dmach1-adc-isr irq-dma1ch1 !
+    ['] dmach1-adc-isr irq-dma1s0 !
     \ reset DMA1
     1 RCC_AHBENR_R bis!
     20 0 do i drop loop
