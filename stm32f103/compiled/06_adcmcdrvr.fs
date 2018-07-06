@@ -330,7 +330,6 @@ adcdbuf maxadcchs hcells + variable adchbuf
 ;
 
 : config-ADC1
-  $100 adc1_base adc_cr2 + bis!
   \ set default conversion channels and sampling time per channel
   $00400000 adc1_base adc_sqr1 + !
   $00000000 adc1_base adc_sqr2 + !
@@ -340,10 +339,10 @@ adcdbuf maxadcchs hcells + variable adchbuf
   2 or 5 lshift
   0 or
   adc1_base adc_sqr3 + !
+  $100 adc1_base adc_cr2 + bis!
 ;
 
 : config-ADC2
-  $100 adc2_base adc_cr2 + bis!
   \ set default conversion channels and sampling time per channel
   $00400000 adc2_base adc_sqr1 + !
   $00000000 adc2_base adc_sqr2 + !
@@ -356,7 +355,6 @@ adcdbuf maxadcchs hcells + variable adchbuf
 ;
 
 : initADCs ( -- )
-  dmaadc-init
   setPrescalerToMaximum
   \ enable clock to ADC1 and ADC2 and reset them
   $0600 rcc_apb2enr_r bis!
@@ -369,6 +367,7 @@ adcdbuf maxadcchs hcells + variable adchbuf
   init-ADC2
   calibrate-ADC1
   calibrate-ADC2
+  dmaadc-init
   config-ADC1
   config-ADC2
   \ Set trigger source for conversion to tim4 oc4 
