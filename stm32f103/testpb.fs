@@ -1,23 +1,25 @@
-GPIOA_BASE GPIO_CRL + constant PA-CRL-R
-GPIOA_BASE GPIO_CRH + constant PA-CRH-R
-GPIOA_BASE GPIO_IDR + constant PA-IDR-R
-GPIOA_BASE GPIO_ODR + constant PA-ODR-R
-GPIOA_BASE GPIO_BSRR + constant PA-BSRR-R
+GPIOB_BASE GPIO_CRL + constant PB-CRL-R
+GPIOB_BASE GPIO_CRH + constant PB-CRH-R
+GPIOB_BASE GPIO_IDR + constant PB-IDR-R
+GPIOB_BASE GPIO_ODR + constant PB-ODR-R
+GPIOB_BASE GPIO_BSRR + constant PB-BSRR-R
 
-: SETUP-PA0-3
-	$5 RCC_APB2ENR_R HBIS!
-	AFIO_BASE AFIO_MAPR + DUP @ 
-	$7000000 BIC $4000000 OR SWAP ! 
-	$00001111 PA-CRL-R ! 
-	$000F0000 PA-BSRR-R !
+: SETUP-PB5
+	$9 RCC_APB2ENR_R HBIS!
+	$00100000 PB-CRL-R ! 
+	$00200000 PB-BSRR-R !
 ;
 
-SETUP-PA0-3
+SETUP-PB5
 
-: tpa-ms ( ms -- )
+: tpb5-ms ( ms -- )
 	1024 0 DO 
-		I 8 MOD 
-		PA-ODR-R c! 
+		I 1 and 0=
+        if        
+		    $20 PB-ODR-R bic!
+        else
+    		$20 PB-ODR-R bis!
+        then
 		dup ms
 	LOOP 
 	drop
