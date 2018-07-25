@@ -1,0 +1,23 @@
+GPIOA_BASE GPIO_CRL + constant PA-CRL-R
+GPIOA_BASE GPIO_CRH + constant PA-CRH-R
+GPIOA_BASE GPIO_IDR + constant PA-IDR-R
+GPIOA_BASE GPIO_ODR + constant PA-ODR-R
+GPIOA_BASE GPIO_BSRR + constant PA-BSRR-R
+
+: SETUP-PA0-3
+	$5 RCC_APB2ENR_R HBIS!
+	$00001111 PA-CRL-R ! 
+	$000F0000 PA-BSRR-R !
+;
+
+SETUP-PA0-3
+
+: tpa-ms ( ms -- )
+	1024 0 DO 
+		I 16 MOD 
+		PA-ODR-R c! 
+		dup ms
+	LOOP 
+	drop
+; 
+
